@@ -131,7 +131,7 @@ def Back():
     password_entry.delete(0, tkinter.END)
     register_window.withdraw()
     login_window.deiconify()
-# 打开文件处理函数（未修改）
+# 打开文件处理函数
 def open_file():
     file_name = filedialog.askopenfilename(
         title="Open File",
@@ -144,7 +144,7 @@ def open_file():
         handle_file(file_name)
         log_action(create_connection("file_editor.db"),NUser,"open",file_name)
 
-# 处理文件类型（未修改）
+# 处理文件类型
 def handle_file(file_name):
     if file_name.endswith(('.png', '.jpg', '.bmp')):
         display_image(file_name)
@@ -153,7 +153,7 @@ def handle_file(file_name):
     else:
         display_binary(file_name)
 
-# 显示图像文件（未修改）
+# 显示图像文件
 def display_image(file_name):
     image = Image.open(file_name)
     max_size = (root.winfo_width()-100, root.winfo_height()-100)
@@ -161,20 +161,20 @@ def display_image(file_name):
     photo = ImageTk.PhotoImage(image)
     open_new_window(photo, is_image=True, file_name=file_name)
 
-# 显示文本文件（未修改）
+# 显示文本文件
 def display_ascii(file_name):
     with open(file_name, 'r', encoding='utf-8') as file:
         content = file.read()
     open_new_window(content, is_image=False, file_name=file_name)
 
-# 显示二进制文件（未修改）
+# 显示二进制文件
 def display_binary(file_name):
     with open(file_name, 'rb') as file:
         content = file.read()
     hex_content = binascii.hexlify(content).decode('utf-8')
     open_new_window(hex_content, is_image=False, file_name=file_name)
 
-# 打开新窗口并显示内容（未修改）
+# 打开新窗口并显示内容
 def open_new_window(content, is_image=False, file_name=""):
     new_frame = ttk.Frame(notebook)
     notebook.add(new_frame, text=file_name.split('/')[-1])
@@ -207,11 +207,11 @@ def open_new_window(content, is_image=False, file_name=""):
     #跳转到现在页面
     notebook.select(new_frame)
 
-# 关闭窗口（未修改）
+# 关闭窗口
 def close_window(frame):
     notebook.forget(frame)
 
-# 保存文件（未修改）
+# 保存文件
 def save_file():
     current_tab = notebook.select()
     if current_tab:
@@ -243,7 +243,7 @@ def edit_file():
         text_area.config(state=tk.NORMAL)
 
 
-# 创建菜单（未修改）
+# 创建菜单
 def create_menu():
     menubar = tk.Menu(root)
     root.config(menu=menubar)
