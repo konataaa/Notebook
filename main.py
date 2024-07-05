@@ -58,9 +58,10 @@ def register_user(conn, username, password):
         messagebox.showerror("Error", f"Failed to register user: {e}")
 
 
+#返回登录
 def toReg():
-    new_username_entry.delete(0,tkinter.END)
-    new_password_entry.delete(0,tkinter.END)
+    new_username_entry.delete(0, tkinter.END)
+    new_password_entry.delete(0, tkinter.END)
 
     login_window.withdraw()
     register_window.deiconify()
@@ -126,11 +127,13 @@ def log_action(conn, username, action, file_name=""):
     except sqlite3.Error as e:
         print(f"Failed to log action: {e}")
 
+#从注册窗口返回登录窗口
 def Back():
     username_entry.delete(0,tkinter.END)
     password_entry.delete(0, tkinter.END)
     register_window.withdraw()
     login_window.deiconify()
+
 # 打开文件处理函数
 def open_file():
     file_name = filedialog.askopenfilename(
@@ -142,7 +145,7 @@ def open_file():
     )
     if file_name:
         handle_file(file_name)
-        log_action(create_connection("file_editor.db"),NUser,"open",file_name)
+        log_action(create_connection("file_editor.db"), NUser, "open", file_name)
 
 # 处理文件类型
 def handle_file(file_name):
@@ -181,7 +184,7 @@ def open_new_window(content, is_image=False, file_name=""):
 
     if is_image:
         label = tk.Label(new_frame, image=content)
-        label.image = content  # Keep a reference to avoid garbage collection
+        label.image = content
         label.pack(fill=tk.BOTH, expand=True)
     else:
         text_area = tk.Text(new_frame)
@@ -216,7 +219,7 @@ def save_file():
     current_tab = notebook.select()
     if current_tab:
         current_frame = notebook.nametowidget(current_tab)
-        text_area = current_frame.winfo_children()[0]  # Assuming the first child is the text widget
+        text_area = current_frame.winfo_children()[0]
         if hasattr(text_area, 'file_path') and text_area.file_path:
             file_path = text_area.file_path
         else:
@@ -254,7 +257,7 @@ def create_menu():
     file_menu.add_command(label="Open", command=open_file)
     # file_menu.add_command(label="Save", command=save_file)
     file_menu.add_command(label="Close Current Tab", command=lambda: close_window(notebook.select()))
-    file_menu.add_command(label="Show", command=show_history)
+    file_menu.add_command(label="Show History", command=show_history)
     file_menu.add_separator()
     file_menu.add_command(label="Login_Exit", command=login_out)
     file_menu.add_command(label="Exit", command=root.quit)
@@ -298,16 +301,22 @@ def show_history():
     history_window = tk.Toplevel(root)
     history_window.title("User Action History")
     history_window.geometry("700x500")
-    # 创建滚动条
-    scrollbar = tk.Scrollbar(history_window)
-    scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
     # 创建文本框
-    history_text = tk.Text(history_window, wrap=tk.WORD, yscrollcommand=scrollbar.set)
+    history_text = tk.Text(history_window, wrap=tk.WORD)
     history_text.pack(expand=True, fill=tk.BOTH)
 
+    # 创建滚动条
+    scrollbar = tk.Scrollbar(history_text)
+    scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
     # 配置滚动条
+    history_text.configure(yscrollcommand=scrollbar.set)
     scrollbar.config(command=history_text.yview)
+
+
+    #创建清空历史记录按钮
+    history_clear_button = ttk.Button(history_window, text="clear", command=lambda: history_clear(history_window))
+    history_clear_button.pack(side=tk.RIGHT, padx=5, pady=5)
 
     # 从数据库中读取历史记录并显示
     sql_select_logs = """
@@ -321,6 +330,20 @@ def show_history():
             history_text.insert(tk.END, f"{log[0]} - {log[1]} - {log[2]} - {log[3]}\n")
 
         history_text.config(state=tk.DISABLED)
+    except sqlite3.Error as e:
+        messagebox.showerror("Error", f"Failed to retrieve logs: {e}")
+
+#清空历史记录
+def history_clear(history_window):
+    sql_delete_logs = """
+        DELETE FROM logs;
+        """
+    try:
+        c = conn.cursor()
+        c.execute(sql_delete_logs)
+        conn.commit()
+        history_window.destroy()
+        show_history()
     except sqlite3.Error as e:
         messagebox.showerror("Error", f"Failed to retrieve logs: {e}")
 
